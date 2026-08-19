@@ -1,0 +1,21 @@
+# Build do Maven
+target/
+
+# IDE - VSCode
+.vscode/
+
+# IDE - IntelliJ
+.idea/
+*.iml
+
+# IDE - Eclipse
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
