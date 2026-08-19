@@ -19,7 +19,10 @@
         <selenium.version>4.27.0</selenium.version>
         <junit.version>5.11.4</junit.version>
         <allure.version>2.35.3</allure.version>
+        <allure.maven.version>2.12.0</allure.maven.version>
         <aspectj.version>1.9.25</aspectj.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <surefire.version>3.5.2</surefire.version>
     </properties>
 
     <dependencyManagement>
@@ -51,6 +54,12 @@
             <artifactId>allure-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -58,7 +67,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>${surefire.version}</version>
                 <configuration>
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
@@ -75,7 +84,7 @@
             <plugin>
                 <groupId>io.qameta.allure</groupId>
                 <artifactId>allure-maven</artifactId>
-                <version>2.12.0</version>
+                <version>${allure.maven.version}</version>
             </plugin>
         </plugins>
     </build>

@@ -482,7 +482,24 @@ O arquivo `pom.xml` foi configurado com as dependências necessárias para o pro
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <selenium.version>4.27.0</selenium.version>
         <junit.version>5.11.4</junit.version>
+        <allure.version>2.35.3</allure.version>
+        <allure.maven.version>2.12.0</allure.maven.version>
+        <aspectj.version>1.9.25</aspectj.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <surefire.version>3.5.2</surefire.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-bom</artifactId>
+                <version>${allure.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -496,6 +513,17 @@ O arquivo `pom.xml` foi configurado com as dependências necessárias para o pro
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -503,7 +531,24 @@ O arquivo `pom.xml` foi configurado com as dependências necessárias para o pro
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>${surefire.version}</version>
+                <configuration>
+                    <argLine>
+                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+                    </argLine>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                        <version>${aspectj.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>${allure.maven.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -547,6 +592,11 @@ O sufixo `-SNAPSHOT` indica que a versão está **em desenvolvimento** e pode mu
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <selenium.version>4.27.0</selenium.version>
     <junit.version>5.11.4</junit.version>
+    <allure.version>2.35.3</allure.version>
+    <allure.maven.version>2.12.0</allure.maven.version>
+    <aspectj.version>1.9.25</aspectj.version>
+    <slf4j.version>2.0.17</slf4j.version>
+    <surefire.version>3.5.2</surefire.version>
 </properties>
 ```
 
@@ -555,11 +605,35 @@ O sufixo `-SNAPSHOT` indica que a versão está **em desenvolvimento** e pode mu
 | `<maven.compiler.source>` | Versão do Java que o compilador deve considerar como código-fonte. | Define que o código usa recursos do Java 17. |
 | `<maven.compiler.target>` | Versão do Java que o compilador deve gerar o bytecode para. | Garante compatibilidade com JVMs Java 17+. |
 | `<project.build.sourceEncoding>` | Codificação de caracteres usada nos arquivos fonte. | Evita problemas com caracteres especiais (acentos, cedilha). |
-| `<selenium.version>` e `<junit.version>` | Variáveis customizadas para versões das dependências. | Centraliza as versões em um único lugar, facilitando atualizações. |
+| `<selenium.version>` | Versão do Selenium WebDriver. | Biblioteca principal para automação web. |
+| `<junit.version>` | Versão do JUnit 5. | Framework de testes. |
+| `<allure.version>` | Versão do Allure BOM. | Gerencia versões dos módulos Allure. |
+| `<allure.maven.version>` | Versão do plugin Allure Maven. | Gera e serve o relatório Allure. |
+| `<aspectj.version>` | Versão do AspectJ Weaver. | Suporte a anotações `@Step` e `@Attachment` do Allure. |
+| `<slf4j.version>` | Versão do SLF4J Simple. | Implementação de logging para suprimir avisos do Selenium. |
+| `<surefire.version>` | Versão do Maven Surefire Plugin. | Executa os testes JUnit durante `mvn test`. |
 
 ### Dependências (Dependencies)
 
-#### Atual
+#### dependencyManagement
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-bom</artifactId>
+            <version>${allure.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+> **Nota:** O `allure-bom` (Bill of Materials) garante que todos os módulos Allure usem a mesma versão, sem precisar especificar a versão em cada dependência.
+
+#### Dependências
 
 ```xml
 <dependencies>
@@ -572,6 +646,17 @@ O sufixo `-SNAPSHOT` indica que a versão está **em desenvolvimento** e pode mu
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
         <version>${junit.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>io.qameta.allure</groupId>
+        <artifactId>allure-jupiter</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
         <scope>test</scope>
     </dependency>
 </dependencies>
@@ -603,7 +688,24 @@ Cada `<dependency>` declara uma biblioteca que o projeto precisa. O Maven baixa 
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.5.2</version>
+            <version>${surefire.version}</version>
+            <configuration>
+                <argLine>
+                    -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+                </argLine>
+            </configuration>
+            <dependencies>
+                <dependency>
+                    <groupId>org.aspectj</groupId>
+                    <artifactId>aspectjweaver</artifactId>
+                    <version>${aspectj.version}</version>
+                </dependency>
+            </dependencies>
+        </plugin>
+        <plugin>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-maven</artifactId>
+            <version>${allure.maven.version}</version>
         </plugin>
     </plugins>
 </build>
@@ -611,9 +713,8 @@ Cada `<dependency>` declara uma biblioteca que o projeto precisa. O Maven baixa 
 
 | Plugin | O que faz |
 |--------|-----------|
-| `maven-surefire-plugin` | Executa os testes JUnit durante `mvn test`. Sem ele, os testes não seriam executados automaticamente. |
-
-> **Nota:** As versões das dependências podem ser atualizadas. Verifique as versões mais recentes em [mvnrepository.com](https://mvnrepository.com/).
+| `maven-surefire-plugin` | Executa os testes JUnit durante `mvn test`. Configurado com AspectJ para suporte a anotações Allure. |
+| `allure-maven` | Gera e serve o relatório Allure a partir dos resultados dos testes. |
 
 ---
 
