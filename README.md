@@ -7,7 +7,7 @@ A aplicação alvo de teste é o site [SauceDemo](https://www.saucedemo.com/).
 
 ## 📋 Sumário
 
-- [🛠️ Preparação do Ambiente](#preparação-do-ambiente)
+- [🛠️ Preparação do Ambiente](#-preparação-do-ambiente)
   - [📊 1. Resumo da Ordem de Instalação](#1-resumo-da-ordem-de-instalação)
   - [☕ 2. Instalar o JDK (Java Development Kit)](#2-instalar-o-jdk-java-development-kit)
   - [📦 3. Instalar o Apache Maven](#3-instalar-o-apache-maven)
@@ -18,11 +18,11 @@ A aplicação alvo de teste é o site [SauceDemo](https://www.saucedemo.com/).
   - [🎬 8. Instalar o Katalon Recorder (Opcional)](#8-instalar-o-katalon-recorder-opcional)
   - [📝 9. Instalar o TestCase Studio (Opcional)](#9-instalar-o-testcase-studio-opcional)
   - [🔍 10. Instalar o SelectorsHub (Opcional)](#10-instalar-o-selectorshub-opcional)
-- [📁 Estrutura do Projeto](#estrutura-do-projeto)
-- [⚙️ Configuração do pom.xml](#configuração-do-pomxml)
-- [▶️ Executar os Testes](#executar-os-testes)
-- [🔄 CI/CD com GitHub Actions](#cicd-com-github-actions)
-- [📊 Allure Reports](#allure-reports)
+- [📁 Estrutura do Projeto](#-estrutura-do-projeto)
+- [⚙️ Configuração do pom.xml](#️-configuração-do-pomxml)
+- [▶️ Executar os Testes](#️-executar-os-testes)
+- [🔄 CI/CD com GitHub Actions](#-cicd-com-github-actions)
+- [📊 Allure Reports](#-allure-reports)
 
 ---
 
