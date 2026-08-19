@@ -2,13 +2,19 @@ package com.saucedemo.tests;
 
 import com.saucedemo.utils.BrowserFactory;
 import com.saucedemo.utils.Constants;
+import io.qameta.allure.Allure;
+import io.qameta.allure.Epic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
+import java.io.ByteArrayInputStream;
 import java.util.logging.LogManager;
 
+@Epic("SauceDemo")
 public abstract class BaseTest {
 
     protected WebDriver driver;
@@ -32,6 +38,9 @@ public abstract class BaseTest {
     @AfterEach
     public void tearDown() {
         if (driver != null) {
+            Allure.addAttachment("Screenshot final", "image/png",
+                    new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)),
+                    ".png");
             driver.quit();
         }
     }

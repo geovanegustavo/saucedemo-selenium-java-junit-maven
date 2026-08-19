@@ -1,6 +1,11 @@
 # Build do Maven
 target/
 
+# Allure
+allure-results/
+allure-report/
+.allure/
+
 # IDE - VSCode
 .vscode/
 

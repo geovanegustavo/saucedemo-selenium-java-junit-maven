@@ -22,6 +22,7 @@ A aplicação alvo de teste é o site [SauceDemo](https://www.saucedemo.com/).
 - [⚙️ Configuração do pom.xml](#configuração-do-pomxml)
 - [▶️ Executar os Testes](#executar-os-testes)
 - [🔄 CI/CD com GitHub Actions](#cicd-com-github-actions)
+- [📊 Allure Reports](#allure-reports)
 
 ---
 
@@ -411,6 +412,7 @@ saucedemo-selenium-java-junit-maven/
 │       │       ├── BaseTest.java
 │       │       └── LoginPageTest.java
 │       └── resources/
+│           ├── allure.properties
 │           └── logging.properties
 └── target/
 ```
@@ -435,6 +437,7 @@ saucedemo-selenium-java-junit-maven/
 | `BrowserType.java` | Enum com os navegadores disponíveis (CHROME, FIREFOX, EDGE, SAFARI e versões headless) |
 | `BrowserFactory.java` | Factory que cria o WebDriver correto baseado no BrowserType selecionado |
 | `logging.properties` | Configuração de logging para suprimir avisos do CDP do Selenium |
+| `allure.properties` | Configuração do diretório de resultados do Allure |
 
 #### Page Object Model vs pom.xml
 
@@ -696,4 +699,42 @@ jobs:
 
 ```bash
 mvn test -Dbrowser=CHROME_HEADLESS
+```
+
+---
+
+## 📊 Allure Reports
+
+O projeto utiliza **Allure Report 3** para gerar relatórios visuais detalhados dos testes.
+
+#### Anotações Allure utilizadas
+
+| Anotação | Onde | O que faz |
+|----------|------|-----------|
+| `@Epic` | `BaseTest` | Agrupa todos os testes do projeto sob um épico |
+| `@Feature` | `LoginPageTest` | Define a funcionalidade testada (Login) |
+| `@Story` | Método de teste | Descreve o cenário específico |
+| `@Severity` | Método de teste | Define a criticidade (BLOCKER, CRITICAL, etc.) |
+
+#### Gerar e visualizar o relatório
+
+```bash
+mvn clean test                  # executa os testes e gera os resultados
+mvn allure:serve                # abre o relatório no navegador
+```
+
+> **Nota:** O `allure:serve` cria o relatório e abre automaticamente no navegador. O relatório fica em `target/allure-report/`.
+
+#### Gerar relatório HTML sem abrir
+
+```bash
+mvn allure:report               # gera em target/allure-report/
+```
+
+#### Estrutura gerada
+
+```
+target/
+├── allure-results/        ← resultados brutos (JSON/XML) gerados pelo Allure
+└── allure-report/         ← relatório HTML gerado pelo plugin
 ```
