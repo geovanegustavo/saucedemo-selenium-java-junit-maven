@@ -730,6 +730,15 @@ on:
   pull_request:
     branches: [ "main", "master" ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -758,13 +767,25 @@ jobs:
         run: |
           allure generate target/allure-results --clean -o target/allure-report
 
-      - name: 🚀 Deploy to GitHub Pages
+      - name: 📤 Upload artifact
         if: always()
-        uses: peaceiris/actions-gh-pages@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: target/allure-report
+          path: target/allure-report
+
+  deploy:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 ```
 
 #### Como funciona
@@ -779,6 +800,16 @@ jobs:
 | **GitHub Pages** | Publica o relatório no branch `gh-pages` — acessível em `https://<usuario>.github.io/<repo>/` |
 
 > **Nota:** O step de relatório e deploy usa `if: always()`, ou seja, executa mesmo se os testes falharem — útil para analisar o que deu errado.
+
+#### Configuração necessária no GitHub
+
+Para que o deploy funcione, habilite o **GitHub Pages** no repositório:
+
+1. Vá em **Settings** → **Pages**
+2. Em **Source**, selecione **GitHub Actions**
+3. Salve
+
+O relatório será acessível em: `https://geovanegustavo.github.io/saucedemo-selenium-java-junit-maven/`
 
 #### Executando os testes localmente com headless
 
