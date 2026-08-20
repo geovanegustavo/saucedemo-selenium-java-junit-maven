@@ -1,7 +1,7 @@
 package com.saucedemo.pages;
 
 import com.saucedemo.utils.Constants;
-import org.openqa.selenium.WebDriver;
+import com.saucedemo.utils.SafeWebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -12,7 +12,7 @@ import org.openqa.selenium.support.PageFactory;
  */
 public class LoginPage {
 
-    private WebDriver driver;
+    private SafeWebDriver driver;
 
     // --- LOCALIZADORES ---
 
@@ -30,9 +30,9 @@ public class LoginPage {
 
     // --- CONSTRUTOR ---
 
-    public LoginPage(WebDriver driver) {
+    public LoginPage(SafeWebDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(driver, this);
+        PageFactory.initElements(driver.getWrappedDriver(), this);
     }
 
     // --- AÇÕES NA PÁGINA ---
@@ -44,19 +44,17 @@ public class LoginPage {
 
     /** Limpa e preenche o campo de usuário. */
     public void enterUsername(String username) {
-        usernameField.clear();
-        usernameField.sendKeys(username);
+        driver.safeType(usernameField, username);
     }
 
     /** Limpa e preenche o campo de senha. */
     public void enterPassword(String password) {
-        passwordField.clear();
-        passwordField.sendKeys(password);
+        driver.safeType(passwordField, password);
     }
 
     /** Clica no botão de login. */
     public void clickLogin() {
-        loginButton.click();
+        driver.safeClick(loginButton);
     }
 
     /** Preenche usuário, senha e clica no botão de login. */
@@ -70,7 +68,7 @@ public class LoginPage {
 
     /** Retorna o texto da mensagem de erro exibida na página. */
     public String getErrorMessage() {
-        return errorMessage.getText();
+        return driver.safeGetText(errorMessage);
     }
 
     /** Retorna a URL atual do navegador. */

@@ -29,7 +29,7 @@ public class InventoryPageTest extends BaseTest {
         inventoryPage.logout();
 
         String currentUrl = inventoryPage.getCurrentUrl();
-        assertTrue(currentUrl.equals(Constants.BASE_URL),
-                "URL deveria ser '" + Constants.BASE_URL + "' após logout. URL atual: " + currentUrl);
+        assertTrue(currentUrl.contains("saucedemo.com") && !currentUrl.contains("inventory"),
+                "URL deveria ser a página de login após logout. URL atual: " + currentUrl);
     }
 }

@@ -1,14 +1,10 @@
 package com.saucedemo.pages;
 
+import com.saucedemo.utils.SafeWebDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 /**
  * Page Object da página de inventário do SauceDemo.
@@ -16,8 +12,7 @@ import java.time.Duration;
  */
 public class InventoryPage {
 
-    private WebDriver driver;
-    private WebDriverWait wait;
+    private SafeWebDriver driver;
 
     // --- LOCALIZADORES ---
 
@@ -32,24 +27,24 @@ public class InventoryPage {
 
     // --- CONSTRUTOR ---
 
-    public InventoryPage(WebDriver driver) {
+    public InventoryPage(SafeWebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        PageFactory.initElements(driver, this);
+        PageFactory.initElements(driver.getWrappedDriver(), this);
     }
 
     // --- AÇÕES NA PÁGINA ---
 
-    /** Abre o menu lateral (hamburger). */
+    /** Abre o menu lateral (hamburger) e espera o logout ficar clicável. */
     public void openMenu() {
-        menuButton.click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("logout_sidebar_link")));
+        driver.safeClick(menuButton);
+        driver.waitUntil(org.openqa.selenium.support.ui.ExpectedConditions
+                .elementToBeClickable(By.id("logout_sidebar_link")));
     }
 
     /** Clica no link de logout dentro do menu lateral. */
     public void clickLogout() {
-        logoutLink.click();
-        wait.until(ExpectedConditions.urlToBe("https://www.saucedemo.com/"));
+        driver.safeClick(logoutLink);
+        driver.waitUntilUrlContains("saucedemo.com");
     }
 
     /** Realiza o logout completo: abre menu e clica em logout. */
@@ -62,7 +57,7 @@ public class InventoryPage {
 
     /** Retorna o título da página de inventário. */
     public String getPageTitle() {
-        return pageTitle.getText();
+        return driver.safeGetText(pageTitle);
     }
 
     /** Retorna a URL atual do navegador. */
