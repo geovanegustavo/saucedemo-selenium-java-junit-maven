@@ -49,6 +49,7 @@ public class InventoryPage {
     /** Clica no link de logout dentro do menu lateral. */
     public void clickLogout() {
         logoutLink.click();
+        wait.until(ExpectedConditions.urlToBe("https://www.saucedemo.com/"));
     }
 
     /** Realiza o logout completo: abre menu e clica em logout. */
