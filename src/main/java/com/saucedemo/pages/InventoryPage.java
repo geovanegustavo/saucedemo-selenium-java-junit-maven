@@ -2,6 +2,7 @@ package com.saucedemo.pages;
 
 import com.saucedemo.utils.SafeWebDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -41,11 +42,10 @@ public class InventoryPage {
                 .elementToBeClickable(By.id("logout_sidebar_link")));
     }
 
-    /** Clica no link de logout dentro do menu lateral. */
+    /** Clica no link de logout via JavaScript (contorna overlay do menu animado). */
     public void clickLogout() {
-        driver.safeClick(logoutLink);
-        driver.waitUntil(org.openqa.selenium.support.ui.ExpectedConditions
-                .not(org.openqa.selenium.support.ui.ExpectedConditions.urlContains("inventory")));
+        ((JavascriptExecutor) driver.getWrappedDriver())
+                .executeScript("arguments[0].click();", logoutLink);
     }
 
     /** Realiza o logout completo: abre menu e clica em logout. */

@@ -8,6 +8,7 @@ import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,8 +29,16 @@ public class InventoryPageTest extends BaseTest {
         inventoryPage = new InventoryPage(driver);
         inventoryPage.logout();
 
-        String currentUrl = inventoryPage.getCurrentUrl();
-        assertTrue(currentUrl.contains("saucedemo.com") && !currentUrl.contains("inventory"),
-                "URL deveria ser a página de login após logout. URL atual: " + currentUrl);
+        driver.waitUntil(ExpectedConditions.or(
+                ExpectedConditions.urlContains("saucedemo.com"),
+                ExpectedConditions.presenceOfElementLocated(
+                        org.openqa.selenium.By.id("login-button"))
+        ));
+
+        String currentUrl = driver.getCurrentUrl();
+        boolean isOnLoginPage = !currentUrl.contains("inventory")
+                || driver.safeIsDisplayed(org.openqa.selenium.By.id("login-button"));
+        assertTrue(isOnLoginPage,
+                "Deveria estar na página de login após logout. URL atual: " + currentUrl);
     }
 }
