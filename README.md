@@ -5,9 +5,9 @@ A aplicação alvo de teste é o site [SauceDemo](https://www.saucedemo.com/).
 
 ---
 
-## 📋 Sumário
+## Sumário
 
-- [🛠️ Preparação do Ambiente](#-preparação-do-ambiente)
+- [🛠️ Preparação do Ambiente](#preparação-do-ambiente)
   - [📊 1. Resumo da Ordem de Instalação](#1-resumo-da-ordem-de-instalação)
   - [☕ 2. Instalar o JDK (Java Development Kit)](#2-instalar-o-jdk-java-development-kit)
   - [📦 3. Instalar o Apache Maven](#3-instalar-o-apache-maven)
@@ -18,26 +18,26 @@ A aplicação alvo de teste é o site [SauceDemo](https://www.saucedemo.com/).
   - [🎬 8. Instalar o Katalon Recorder (Opcional)](#8-instalar-o-katalon-recorder-opcional)
   - [📝 9. Instalar o TestCase Studio (Opcional)](#9-instalar-o-testcase-studio-opcional)
   - [🔍 10. Instalar o SelectorsHub (Opcional)](#10-instalar-o-selectorshub-opcional)
-- [📁 Estrutura do Projeto](#-estrutura-do-projeto)
-- [🛡️ SafeWebDriver — Auto-Waiting](#️-safewebdriver--auto-waiting)
-- [⚙️ Configuração do pom.xml](#️-configuração-do-pomxml)
+- [📁 Estrutura do Projeto](#estrutura-do-projeto)
+- [🛡️ SafeWebDriver — Auto-Waiting](#safewebdriver----auto-waiting)
+- [⚙️ Configuração do pom.xml](#configuração-do-pomxml)
   - [1. Cabeçalho XML e declaração do projeto](#1-cabeçalho-xml-e-declaração-do-projeto)
   - [2. Identificação do Projeto](#2-identificação-do-projeto)
   - [3. Propriedades (Properties)](#3-propriedades-properties)
   - [4. Gerenciamento de Dependências (dependencyManagement)](#4-gerenciamento-de-dependências-dependencymanagement)
   - [5. Dependências (Dependencies)](#5-dependências-dependencies)
   - [6. Build e Plugins](#6-build-e-plugins)
-- [▶️ Executar os Testes](#️-executar-os-testes)
-- [🔄 CI/CD com GitHub Actions](#-cicd-com-github-actions)
-- [📊 Allure Reports](#-allure-reports)
+- [▶️ Executar os Testes](#executar-os-testes)
+- [🔄 CI/CD com GitHub Actions](#cicd-com-github-actions)
+- [📊 Allure Reports](#allure-reports)
 
 ---
 
-## 🛠️ Preparação do Ambiente
+## Preparação do Ambiente
 
 Siga a ordem abaixo para instalar e configurar todas as ferramentas necessárias na sua máquina Windows.
 
-### 📊 1. Resumo da Ordem de Instalação
+### 1. Resumo da Ordem de Instalação
 
 | Ordem | Ferramenta      | Justificativa                                              |
 |:-----:|-----------------|------------------------------------------------------------|
@@ -48,7 +48,7 @@ Siga a ordem abaixo para instalar e configurar todas as ferramentas necessárias
 
 ---
 
-### ☕ 2. Instalar o JDK (Java Development Kit)
+### 2. Instalar o JDK (Java Development Kit)
 
 O Selenium e o Maven dependem do Java para funcionar. Instale o **JDK 11** ou superior.
 
@@ -89,7 +89,7 @@ openjdk version "17.0.x" ...
 
 ---
 
-### 📦 3. Instalar o Apache Maven
+### 3. Instalar o Apache Maven
 
 #### O que é o Maven?
 
@@ -155,7 +155,7 @@ Java version: 17.0.x, vendor: Eclipse Adoptium
 
 ---
 
-### 💻 4. Instalar o Visual Studio Code
+### 4. Instalar o Visual Studio Code
 
 1. Acesse [https://code.visualstudio.com/download](https://code.visualstudio.com/download).
 2. Baixe o instalador para Windows.
@@ -167,7 +167,7 @@ Após a instalação, abra o VSCode para verificar se está funcionando.
 
 ---
 
-### 🧩 5. Instalar Extensões do VSCode
+### 5. Instalar Extensões do VSCode
 
 Abra o VSCode e instale as seguintes extensões via **Extensions** (`Ctrl + Shift + X`):
 
@@ -182,7 +182,7 @@ Após instalar, reinicie o VSCode. Aguarde o **"Java Language Server"** iniciali
 
 ---
 
-### ✅ 6. Verificar o Ambiente
+### 6. Verificar o Ambiente
 
 Abra o **Terminal integrado do VSCode** (`Ctrl + `` ` ``) ou o CMD e execute os comandos abaixo para validar que tudo está configurado:
 
@@ -196,7 +196,7 @@ Todos os três comandos devem retornar informações de versão sem erros.
 
 ---
 
-### 🚀 7. Criar o Projeto no VSCode
+### 7. Criar o Projeto no VSCode
 
 Após verificar o ambiente, crie o projeto Maven diretamente no VSCode:
 
@@ -221,7 +221,7 @@ Após a criação, o VSCode abrirá a pasta do projeto. Aguarde o **Java Languag
 
 ---
 
-### 🎬 8. Instalar o Katalon Recorder (Opcional)
+### 8. Instalar o Katalon Recorder (Opcional)
 
 > **Nota:** Esta etapa é **opcional**. O Katalon Recorder é uma ferramenta de **auxílio** para quem está começando — não é necessária para o funcionamento do projeto. Ele pode ser útil para gerar scripts iniciais e identificar localizadores, mas todos os testes podem ser escritos manualmente sem ele.
 
@@ -285,7 +285,7 @@ public class LoginScript {
 
 ---
 
-### 📝 9. Instalar o TestCase Studio (Opcional)
+### 9. Instalar o TestCase Studio (Opcional)
 
 > **Nota:** Esta etapa é **opcional**. O TestCase Studio é uma ferramenta de **auxílio** complementar ao Katalon Recorder — não é necessária para o funcionamento do projeto. Ele pode ser útil para gerar documentação de testes em linguagem natural e capturar prints de cada etapa.
 
@@ -332,7 +332,7 @@ O [TestCase Studio](https://selectorshub.com/testcase-studio/) é uma extensão 
 
 ---
 
-### 🔍 10. Instalar o SelectorsHub (Opcional)
+### 10. Instalar o SelectorsHub (Opcional)
 
 > **Nota:** Esta etapa é **opcional**. O SelectorsHub é uma ferramenta de **auxílio** para quem deseja aprofundar na criação e validação de localizadores — não é necessária para o funcionamento do projeto. Ele é especialmente útil quando os localizadores gerados pelo Katalon Recorder ou TestCase Studio não são suficientes ou quando é necessário criar localizadores mais robustos.
 
@@ -393,7 +393,7 @@ Enquanto o Katalon Recorder e o TestCase Studio **geram** localizadores automati
 
 ---
 
-## 🛡️ SafeWebDriver — Auto-Waiting
+## SafeWebDriver — Auto-Waiting
 
 O projeto implementa um **wrapper customizado** do `WebDriver` chamado `SafeWebDriver`, que adiciona **auto-waiting automático** a todas as ações — similar ao comportamento do Playwright.
 
@@ -468,7 +468,7 @@ new SafeWebDriver(rawDriver, Duration.ofSeconds(15));
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 O projeto segue o padrão **Page Object Model (POM)**, que separa a representação das páginas do site das classes de teste. Cada página web é representada por uma classe Java que encapsula os elementos (locators) e ações (métodos) disponíveis nessa página. As classes de teste utilizam esses objetos de página, sem acessar diretamente os elementos HTML.
 
@@ -541,7 +541,7 @@ O nome parecido gera confusão. São coisas completamente diferentes:
 
 ---
 
-## ⚙️ Configuração do pom.xml
+## Configuração do pom.xml
 
 O arquivo `pom.xml` (Project Object Model) é o centro de qualquer projeto Maven. Ele define tudo que o Maven precisa saber sobre o projeto: identificação, dependências, plugins e configurações de build.
 
@@ -755,7 +755,7 @@ Cada `<dependency>` declara uma biblioteca que o projeto precisa. O Maven baixa 
 
 ---
 
-## ▶️ Executar os Testes
+## Executar os Testes
 
 No terminal do VSCode ou CMD, na raiz do projeto, execute:
 
@@ -793,7 +793,7 @@ mvn test -Dbrowser=SAFARI
 
 ---
 
-## 🔄 CI/CD com GitHub Actions
+## CI/CD com GitHub Actions
 
 O projeto inclui um workflow automatizado que executa os testes, gera o relatório Allure e publica no GitHub Pages a cada **push** ou **pull request** no branch `main`/`master`.
 
@@ -927,7 +927,7 @@ mvn test -Dbrowser=CHROME_HEADLESS
 
 ---
 
-## 📊 Allure Reports
+## Allure Reports
 
 O projeto utiliza **Allure Report 3** para gerar relatórios visuais detalhados dos testes.
 
