@@ -20,6 +20,12 @@ A aplicação alvo de teste é o site [SauceDemo](https://www.saucedemo.com/).
   - [🔍 10. Instalar o SelectorsHub (Opcional)](#10-instalar-o-selectorshub-opcional)
 - [📁 Estrutura do Projeto](#-estrutura-do-projeto)
 - [⚙️ Configuração do pom.xml](#️-configuração-do-pomxml)
+  - [1. Cabeçalho XML e declaração do projeto](#1-cabeçalho-xml-e-declaração-do-projeto)
+  - [2. Identificação do Projeto](#2-identificação-do-projeto)
+  - [3. Propriedades (Properties)](#3-propriedades-properties)
+  - [4. Gerenciamento de Dependências (dependencyManagement)](#4-gerenciamento-de-dependências-dependencymanagement)
+  - [5. Dependências (Dependencies)](#5-dependências-dependencies)
+  - [6. Build e Plugins](#6-build-e-plugins)
 - [▶️ Executar os Testes](#️-executar-os-testes)
 - [🔄 CI/CD com GitHub Actions](#-cicd-com-github-actions)
 - [📊 Allure Reports](#-allure-reports)
@@ -401,6 +407,7 @@ saucedemo-selenium-java-junit-maven/
 │   │   └── java/
 │   │       └── com/saucedemo/
 │   │           ├── pages/
+│   │           │   ├── InventoryPage.java
 │   │           │   └── LoginPage.java
 │   │           └── utils/
 │   │               ├── BrowserFactory.java
@@ -410,7 +417,8 @@ saucedemo-selenium-java-junit-maven/
 │       ├── java/
 │       │   └── com/saucedemo/tests/
 │       │       ├── BaseTest.java
-│       │       └── LoginPageTest.java
+│       │       ├── LoginPageTest.java
+│       │       └── LogoutPageTest.java
 │       └── resources/
 │           ├── allure.properties
 │           └── logging.properties
@@ -431,8 +439,10 @@ saucedemo-selenium-java-junit-maven/
 | Arquivo | Descrição |
 |---------|-----------|
 | `BaseTest.java` | Classe abstrata que configura e encerra o WebDriver. Todos os testes herdam dela. |
-| `LoginPageTest.java` | Teste de login positivo no SauceDemo |
+| `LoginPageTest.java` | Teste de login positivo e negativo no SauceDemo |
+| `LogoutPageTest.java` | Teste de logout no SauceDemo |
 | `LoginPage.java` | Page Object da página de login — localizadores e métodos de interação |
+| `InventoryPage.java` | Page Object da página de inventário — menu lateral e logout |
 | `Constants.java` | Constantes centralizadas (URL, usuário, senha, navegador) |
 | `BrowserType.java` | Enum com os navegadores disponíveis (CHROME, FIREFOX, EDGE, SAFARI e versões headless) |
 | `BrowserFactory.java` | Factory que cria o WebDriver correto baseado no BrowserType selecionado |
@@ -455,11 +465,11 @@ O nome parecido gera confusão. São coisas completamente diferentes:
 
 ## ⚙️ Configuração do pom.xml
 
-O arquivo `pom.xml` (Project Object Model) é o centro de qualquer projeto Maven. Ele define tudo que o Maven precisa saber sobre o projeto.
+O arquivo `pom.xml` (Project Object Model) é o centro de qualquer projeto Maven. Ele define tudo que o Maven precisa saber sobre o projeto: identificação, dependências, plugins e configurações de build.
 
-### pom.xml atual do projeto
+---
 
-O arquivo `pom.xml` foi configurado com as dependências necessárias para o projeto:
+### 1. Cabeçalho XML e declaração do projeto
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -468,14 +478,41 @@ O arquivo `pom.xml` foi configurado com as dependências necessárias para o pro
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+```
 
+| Tag | O que é |
+|-----|---------|
+| `<?xml ... ?>` | Declaração do XML — define versão (1.0) e codificação (UTF-8). |
+| `<project>` | Raiz do arquivo — declara os namespaces XML (XSD) que validam o formato do pom.xml. |
+| `<modelVersion>` | Versão do modelo Maven. Sempre `4.0.0` — não muda entre versões do Maven. |
+
+---
+
+### 2. Identificação do Projeto
+
+```xml
     <groupId>com.saucedemo</groupId>
     <artifactId>saucedemo-selenium-java-junit-maven</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-
     <name>saucedemo-selenium-java-junit-maven</name>
+```
 
+| Tag | O que é | Exemplo |
+|-----|---------|---------|
+| `<groupId>` | Identificador único da organização. Segue o padrão de domínio invertido. | `com.saucedemo` |
+| `<artifactId>` | Nome único do projeto dentro do grupo. É o nome do `.jar` gerado. | `saucedemo-selenium-java-junit-maven` |
+| `<version>` | Versão atual. `-SNAPSHOT` = em desenvolvimento. | `1.0-SNAPSHOT` |
+| `<packaging>` | Tipo de arquivo gerado. `jar` é o padrão para projetos Java. | `jar` |
+| `<name>` | Nome legível do projeto (usado em relatórios e documentação). | `saucedemo-selenium-java-junit-maven` |
+
+> **Nota:** O sufixo `-SNAPSHOT` indica versão em desenvolvimento. Ele é removido no release (ex: `1.0`). Para projetos de estudo, é comum manter indefinidamente.
+
+---
+
+### 3. Propriedades (Properties)
+
+```xml
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -488,7 +525,28 @@ O arquivo `pom.xml` foi configurado com as dependências necessárias para o pro
         <slf4j.version>2.0.17</slf4j.version>
         <surefire.version>3.5.2</surefire.version>
     </properties>
+```
 
+As propriedades são **variáveis** reutilizáveis. Em vez de escrever a versão em vários lugares, define-se uma vez e referencia com `${nome}`.
+
+| Tag | O que é | Por que usar |
+|-----|---------|--------------|
+| `<maven.compiler.source>` | Versão do Java-fonte que o compilador deve considerar. | Define que o código usa recursos do Java 17. |
+| `<maven.compiler.target>` | Versão do bytecode gerado. | Garante compatibilidade com JVMs Java 17+. |
+| `<project.build.sourceEncoding>` | Codificação dos arquivos fonte. | Evita problemas com acentos e caracteres especiais. |
+| `<selenium.version>` | Versão do Selenium WebDriver. | Biblioteca principal para automação web. |
+| `<junit.version>` | Versão do JUnit 5. | Framework de testes. |
+| `<allure.version>` | Versão do Allure BOM. | Gerencia versões dos módulos Allure automaticamente. |
+| `<allure.maven.version>` | Versão do plugin Allure Maven. | Gera e serve o relatório Allure. |
+| `<aspectj.version>` | Versão do AspectJ Weaver. | Suporte a anotações `@Step` e `@Attachment` do Allure. |
+| `<slf4j.version>` | Versão do SLF4J Simple. | Implementação de logging para suprimir avisos do Selenium. |
+| `<surefire.version>` | Versão do Maven Surefire Plugin. | Executa os testes JUnit durante `mvn test`. |
+
+---
+
+### 4. Gerenciamento de Dependências (dependencyManagement)
+
+```xml
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -500,7 +558,22 @@ O arquivo `pom.xml` foi configurado com as dependências necessárias para o pro
             </dependency>
         </dependencies>
     </dependencyManagement>
+```
 
+| Tag | O que é |
+|-----|---------|
+| `<dependencyManagement>` | Define versões padrão para dependências — sem baixá-las ainda. |
+| `<allure-bom>` | **Bill of Materials** — garante que todos os módulos Allure usem a mesma versão. |
+| `<type>pom</type>` | Indica que é um POM (arquivo de configuração), não um `.jar`. |
+| `<scope>import</scope>` | Importa as versões definidas no BOM para este projeto. |
+
+> **Por que existe?** Sem o BOM, cada módulo Allure precisaria de versão explícita. Com ele, basta definir `<allure.version>` uma vez e todas as dependências Allure herdam automaticamente.
+
+---
+
+### 5. Dependências (Dependencies)
+
+```xml
     <dependencies>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -525,7 +598,40 @@ O arquivo `pom.xml` foi configurado com as dependências necessárias para o pro
             <scope>test</scope>
         </dependency>
     </dependencies>
+```
 
+Cada `<dependency>` declara uma biblioteca que o projeto precisa. O Maven baixa automaticamente todas as dependências (e dependências das dependências) do repositório central.
+
+| Dependência | O que faz | Scope |
+|-------------|-----------|-------|
+| `selenium-java` | Biblioteca principal para automação web — controla o navegador. | *(vazio)* — disponível em compile e teste |
+| `junit-jupiter` | Framework de testes JUnit 5 — anotações `@Test`, asserts, lifecycle. | `test` |
+| `allure-jupiter` | Integração Allure com JUnit 5 — gera resultados para o relatório. | `test` |
+| `slf4j-simple` | Implementação simples de logging — suprime avisos SLF4J do Selenium. | `test` |
+
+**Tags de cada dependência:**
+
+| Tag | O que é | Exemplo |
+|-----|---------|---------|
+| `<groupId>` | Organização que desenvolveu a biblioteca. | `org.seleniumhq.selenium` |
+| `<artifactId>` | Nome da biblioteca. | `selenium-java` |
+| `<version>` | Versão. Pode usar `${variável}` para referenciar uma propriedade. | `${selenium.version}` |
+| `<scope>` | Fases em que está disponível. | `test` (só durante execução de testes) |
+
+**Escopos mais comuns:**
+
+| Escopo | Compile | Test | Runtime | Exemplo de uso |
+|--------|:-------:|:----:|:-------:|----------------|
+| *(vazio)* | Sim | Sim | Sim | Dependência padrão — disponível em todas as fases |
+| `test` | Não | Sim | Não | JUnit — só usado nos testes, não no código de produção |
+| `provided` | Sim | Sim | Não | Servlet API — fornecida pelo servidor na hora de rodar |
+| `runtime` | Não | Sim | Sim | JDBC driver — só necessário na hora de executar |
+
+---
+
+### 6. Build e Plugins
+
+```xml
     <build>
         <plugins>
             <plugin>
@@ -555,166 +661,19 @@ O arquivo `pom.xml` foi configurado com as dependências necessárias para o pro
 </project>
 ```
 
-### Identificação do Projeto
-
-```xml
-<groupId>com.saucedemo</groupId>
-<artifactId>saucedemo-selenium-java-junit-maven</artifactId>
-<version>1.0-SNAPSHOT</version>
-```
-
-| Tag | O que é | Exemplo |
-|-----|---------|---------|
-| `<groupId>` | Identificador único da organização/empresa que desenvolve o projeto. Geralmente segue o padrão de domínio invertido. | `com.saucedemo` |
-| `<artifactId>` | Nome único do projeto dentro do grupo. É o nome que será gerado no arquivo final (`.jar`). | `saucedemo-selenium-java-junit-maven` |
-| `<version>` | Versão atual do projeto. O sufixo `-SNAPSHOT` indica que é uma versão em desenvolvimento (ainda não publicada). | `1.0-SNAPSHOT` |
-
-#### Quando o sufixo `-SNAPSHOT` deixa de ser utilizado?
-
-O sufixo `-SNAPSHOT` indica que a versão está **em desenvolvimento** e pode mudar a qualquer momento. Ele é removido no momento do **release** (publicação da versão estável). O ciclo de vida das versões segue este padrão:
-
-| Etapa | Tag `<version>` | Sufixo `-SNAPSHOT` | Fase |
-|:-----:|-----------------|:-------------------:|------|
-| 1 | `<version>1.0-SNAPSHOT</version>` | Sim | Desenvolvimento |
-| 2 | `<version>1.0</version>` | Não | Release (publicação) |
-| 3 | `<version>1.1-SNAPSHOT</version>` | Sim | Desenvolvimento |
-| 4 | `<version>1.1</version>` | Não | Release (publicação) |
-| 5 | `<version>1.2-SNAPSHOT</version>` | Sim | Desenvolvimento |
-
-> **Nota:** Para projetos de estudo e testes automatizados (como este), é comum manter o `-SNAPSHOT` indefinidamente, já que não há publicação em repositório oficial. O sufixo só precisa ser removido quando o projeto for publicado para um repositório Maven (Nexus, Artifactory, Maven Central).
-
-### Propriedades (Properties)
-
-```xml
-<properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <selenium.version>4.27.0</selenium.version>
-    <junit.version>5.11.4</junit.version>
-    <allure.version>2.35.3</allure.version>
-    <allure.maven.version>2.12.0</allure.maven.version>
-    <aspectj.version>1.9.25</aspectj.version>
-    <slf4j.version>2.0.17</slf4j.version>
-    <surefire.version>3.5.2</surefire.version>
-</properties>
-```
-
-| Tag | O que é | Por que usar |
-|-----|---------|--------------|
-| `<maven.compiler.source>` | Versão do Java que o compilador deve considerar como código-fonte. | Define que o código usa recursos do Java 17. |
-| `<maven.compiler.target>` | Versão do Java que o compilador deve gerar o bytecode para. | Garante compatibilidade com JVMs Java 17+. |
-| `<project.build.sourceEncoding>` | Codificação de caracteres usada nos arquivos fonte. | Evita problemas com caracteres especiais (acentos, cedilha). |
-| `<selenium.version>` | Versão do Selenium WebDriver. | Biblioteca principal para automação web. |
-| `<junit.version>` | Versão do JUnit 5. | Framework de testes. |
-| `<allure.version>` | Versão do Allure BOM. | Gerencia versões dos módulos Allure. |
-| `<allure.maven.version>` | Versão do plugin Allure Maven. | Gera e serve o relatório Allure. |
-| `<aspectj.version>` | Versão do AspectJ Weaver. | Suporte a anotações `@Step` e `@Attachment` do Allure. |
-| `<slf4j.version>` | Versão do SLF4J Simple. | Implementação de logging para suprimir avisos do Selenium. |
-| `<surefire.version>` | Versão do Maven Surefire Plugin. | Executa os testes JUnit durante `mvn test`. |
-
-### Dependências (Dependencies)
-
-#### dependencyManagement
-
-```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-bom</artifactId>
-            <version>${allure.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
-```
-
-> **Nota:** O `allure-bom` (Bill of Materials) garante que todos os módulos Allure usem a mesma versão, sem precisar especificar a versão em cada dependência.
-
-#### Dependências
-
-```xml
-<dependencies>
-    <dependency>
-        <groupId>org.seleniumhq.selenium</groupId>
-        <artifactId>selenium-java</artifactId>
-        <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>io.qameta.allure</groupId>
-        <artifactId>allure-jupiter</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>${slf4j.version}</version>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
-```
-
-Cada `<dependency>` declara uma biblioteca que o projeto precisa. O Maven baixa automaticamente todas as dependências (e dependências das dependências) do repositório central.
-
-| Tag | O que é | Exemplo |
-|-----|---------|---------|
-| `<groupId>` | Organização que desenvolveu a biblioteca. | `org.seleniumhq.selenium` |
-| `<artifactId>` | Nome da biblioteca. | `selenium-java` |
-| `<version>` | Versão da biblioteca. Pode usar `${variável}` para referenciar uma propriedade definida acima. | `${selenium.version}` |
-| `<scope>` | Escopo da dependência — define em quais fases ela está disponível. | `test` (só disponível durante a execução de testes, não no código final) |
-
-**Escopos mais comuns:**
-
-| Escopo | Compile | Test | Runtime | Exemplo de uso |
-|--------|:-------:|:----:|:-------:|----------------|
-| *(vazio)* | Sim | Sim | Sim | Dependência padrão — disponível em todas as fases |
-| `test` | Não | Sim | Não | JUnit — só usado nos testes, não no código de produção |
-| `provided` | Sim | Sim | Não | Servlet API — fornecida pelo servidor na hora de rodar |
-| `runtime` | Não | Sim | Sim | JDBC driver — só necessário na hora de executar |
-
-### Build e Plugins
-
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>${surefire.version}</version>
-            <configuration>
-                <argLine>
-                    -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
-                </argLine>
-            </configuration>
-            <dependencies>
-                <dependency>
-                    <groupId>org.aspectj</groupId>
-                    <artifactId>aspectjweaver</artifactId>
-                    <version>${aspectj.version}</version>
-                </dependency>
-            </dependencies>
-        </plugin>
-        <plugin>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-maven</artifactId>
-            <version>${allure.maven.version}</version>
-        </plugin>
-    </plugins>
-</build>
-```
-
 | Plugin | O que faz |
 |--------|-----------|
 | `maven-surefire-plugin` | Executa os testes JUnit durante `mvn test`. Configurado com AspectJ para suporte a anotações Allure. |
 | `allure-maven` | Gera e serve o relatório Allure a partir dos resultados dos testes. |
+
+**Detalhes do Surefire Plugin:**
+
+| Tag | O que é |
+|-----|---------|
+| `<configuration><argLine>` | Passa o AspectJ Weaver como javaagent — necessário para que as anotações Allure (`@Step`, `@Attachment`) funcionem em tempo de execução. |
+| `<dependencies><dependency>` | Declara o AspectJ Weaver como dependência do plugin (não do projeto). |
+
+> **Nota:** O `settings.localRepository` é o caminho local do repositório Maven (geralmente `~/.m2/repository`). O AspectJ Weaver é baixado automaticamente na primeira execução.
 
 ---
 
@@ -732,12 +691,14 @@ O Maven irá baixar todas as dependências automaticamente na primeira execuçã
 
 ```bash
 mvn test -Dtest=LoginPageTest
+mvn test -Dtest=LogoutPageTest
 ```
 
 ### Executar um método específico
 
 ```bash
 mvn test -Dtest=LoginPageTest#testLoginComUsuarioValido
+mvn test -Dtest=LogoutPageTest#testLogoutComSucesso
 ```
 
 ### Executar com navegador específico
@@ -756,7 +717,7 @@ mvn test -Dbrowser=SAFARI
 
 ## 🔄 CI/CD com GitHub Actions
 
-O projeto inclui um workflow automatizado que executa os testes a cada **push** ou **pull request** no branch `main`/`master`.
+O projeto inclui um workflow automatizado que executa os testes, gera o relatório Allure e publica no GitHub Pages a cada **push** ou **pull request** no branch `main`/`master`.
 
 #### Arquivo: `.github/workflows/test.yml`
 
@@ -784,7 +745,23 @@ jobs:
           distribution: 'temurin'
 
       - name: 🧪 Run tests
-        run: mvn test -Dbrowser=CHROME_HEADLESS
+        run: mvn clean test -Dbrowser=CHROME_HEADLESS
+
+      - name: 📊 Generate Allure Report
+        if: always()
+        uses: simple-elf/allure-report-action@v1.3
+        with:
+          allure_results: target/allure-results
+          allure_report: target/allure-report
+          allure_history: target/allure-history
+
+      - name: 🚀 Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: target/allure-report
 ```
 
 #### Como funciona
@@ -795,6 +772,10 @@ jobs:
 | **Runner** | `ubuntu-latest` — máquina virtual do GitHub com Chrome pré-instalado |
 | **JDK** | Eclipse Temurin JDK 17 (mesma versão usada no projeto) |
 | **Navegador** | `CHROME_HEADLESS` — Chrome sem interface gráfica, ideal para ambientes CI |
+| **Allure Report** | Gera o relatório HTML a partir dos resultados dos testes |
+| **GitHub Pages** | Publica o relatório no branch `gh-pages` — acessível em `https://<usuario>.github.io/<repo>/` |
+
+> **Nota:** O step de relatório e deploy usa `if: always()`, ou seja, executa mesmo se os testes falharem — útil para analisar o que deu errado.
 
 #### Executando os testes localmente com headless
 
@@ -813,9 +794,35 @@ O projeto utiliza **Allure Report 3** para gerar relatórios visuais detalhados 
 | Anotação | Onde | O que faz |
 |----------|------|-----------|
 | `@Epic` | `BaseTest` | Agrupa todos os testes do projeto sob um épico |
-| `@Feature` | `LoginPageTest` | Define a funcionalidade testada (Login) |
+| `@Feature` | Classe de teste | Define a funcionalidade testada (Login, Logout, etc.) |
 | `@Story` | Método de teste | Descreve o cenário específico |
-| `@Severity` | Método de teste | Define a criticidade (BLOCKER, CRITICAL, etc.) |
+| `@Severity` | Método de teste | Define a criticidade do teste |
+
+#### Severidades por tipo de teste
+
+| Severidade | Quando usar | Exemplo neste projeto |
+|------------|-------------|----------------------|
+| `BLOCKER` | Funcionalidade crítica — se falhar, o sistema principal está inutilizável | Login com credenciais válidas, Logout |
+| `CRITICAL` | Funcionalidade importante — se falhar, afeta a experiência do usuário | Login com credenciais inválidas (verificação de erro) |
+| `MAJOR` | Funcionalidade secundária — falha impacta parcialmente o usuário | Adicionar item ao carrinho |
+| `MINOR` | Funcionalidade de baixo impacto — falha cosmetica ou inconveniente | Ordenação de itens |
+| `TRIVIAL` | Teste exploratório ou documentação — falha não afeta o usuário | Teste de UI, responsividade |
+
+> **Nota:** Neste projeto, usamos `BLOCKER` para fluxos principais (login/logout) e `CRITICAL` para validações de erro. Conforme novos testes são adicionados, as severidades devem seguir esta mesma lógica.
+
+#### Exemplo de aplicação
+
+```java
+@Test
+@Story("Login com usuário válido")
+@Severity(SeverityLevel.BLOCKER)    // fluxo principal do sistema
+public void testLoginComUsuarioValido() { ... }
+
+@Test
+@Story("Login com usuário inválido")
+@Severity(SeverityLevel.CRITICAL)   // validação de regra de negócio
+public void testLoginComUsuarioInvalido() { ... }
+```
 
 #### Gerar e visualizar o relatório
 

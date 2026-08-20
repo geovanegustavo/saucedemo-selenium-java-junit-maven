@@ -21,4 +21,20 @@ jobs:
           distribution: 'temurin'
 
       - name: 🧪 Run tests
-        run: mvn test -Dbrowser=CHROME_HEADLESS
+        run: mvn clean test -Dbrowser=CHROME_HEADLESS
+
+      - name: 📊 Generate Allure Report
+        if: always()
+        uses: simple-elf/allure-report-action@v1.3
+        with:
+          allure_results: target/allure-results
+          allure_report: target/allure-report
+          allure_history: target/allure-history
+
+      - name: 🚀 Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: target/allure-report

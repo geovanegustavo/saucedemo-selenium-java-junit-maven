@@ -8,7 +8,7 @@ public class Constants {
     public static final String INVENTORY_URL = "/inventory.html";
 
     public static final BrowserType BROWSER = BrowserType.valueOf(
-            System.getProperty("browser", BrowserType.CHROME.name())
+            System.getProperty("browser", BrowserType.CHROME_HEADLESS.name())
     );
 
 }
