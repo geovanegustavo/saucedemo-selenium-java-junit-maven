@@ -19,6 +19,7 @@ A aplicação alvo de teste é o site [SauceDemo](https://www.saucedemo.com/).
   - [📝 9. Instalar o TestCase Studio (Opcional)](#9-instalar-o-testcase-studio-opcional)
   - [🔍 10. Instalar o SelectorsHub (Opcional)](#10-instalar-o-selectorshub-opcional)
 - [📁 Estrutura do Projeto](#-estrutura-do-projeto)
+- [🛡️ SafeWebDriver — Auto-Waiting](#️-safewebdriver--auto-waiting)
 - [⚙️ Configuração do pom.xml](#️-configuração-do-pomxml)
   - [1. Cabeçalho XML e declaração do projeto](#1-cabeçalho-xml-e-declaração-do-projeto)
   - [2. Identificação do Projeto](#2-identificação-do-projeto)
@@ -392,6 +393,81 @@ Enquanto o Katalon Recorder e o TestCase Studio **geram** localizadores automati
 
 ---
 
+## 🛡️ SafeWebDriver — Auto-Waiting
+
+O projeto implementa um **wrapper customizado** do `WebDriver` chamado `SafeWebDriver`, que adiciona **auto-waiting automático** a todas as ações — similar ao comportamento do Playwright.
+
+### Por que usar?
+
+No Selenium tradicional, é necessário inserir `WebDriverWait` manualmente em cada interação:
+
+```java
+// Selenium tradicional — verbose e propenso a erros
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(By.id("btn")));
+btn.click();
+```
+
+Com `SafeWebDriver`, as esperas são automáticas:
+
+```java
+// Com SafeWebDriver — limpo e seguro
+driver.safeClick(By.id("btn"));
+```
+
+### Como funciona
+
+O `SafeWebDriver` implementa `WebDriver` e delega todas as chamadas para o driver original. Antes de cada ação, ele aguarda automaticamente que o elemento esteja:
+
+1. **Visível** — `visibilityOfElementLocated`
+2. **Habilitado** — `elementToBeClickable`
+3. **Clicável** — `elementToBeClickable`
+
+**Configurações padrão:**
+- Timeout: **10 segundos**
+- Polling: **500ms**
+
+### Métodos disponíveis
+
+| Método | O que faz | Exemplo |
+|--------|-----------|---------|
+| `safeClick(By)` | Espera elemento ser clicável → clica | `driver.safeClick(By.id("btn"))` |
+| `safeClick(WebElement)` | Espera WebElement ser clicável → clica | `driver.safeClick(loginButton)` |
+| `safeType(By, text)` | Espera visível → limpa → digita | `driver.safeType(By.id("user"), "admin")` |
+| `safeType(WebElement, text)` | Espera WebElement visível → limpa → digita | `driver.safeType(usernameField, "admin")` |
+| `safeGetText(By)` | Espera visível → retorna texto | `String title = driver.safeGetText(By.className("title"))` |
+| `safeGetText(WebElement)` | Espera WebElement visível → retorna texto | `String text = driver.safeGetText(element)` |
+| `safeGetAttribute(By, attr)` | Espera existir → retorna atributo | `String val = driver.safeGetAttribute(By.id("btn"), "value")` |
+| `safeIsDisplayed(By)` | Retorna `true/false` sem exception | `if (driver.safeIsDisplayed(By.id("msg")))` |
+| `safeIsEnabled(By)` | Retorna `true/false` sem exception | `if (driver.safeIsEnabled(By.id("btn")))` |
+| `waitUntilHidden(By)` | Espera elemento desaparecer | `driver.waitUntilHidden(By.id("loading"))` |
+| `waitUntilUrlContains(str)` | Espera URL conter texto | `driver.waitUntilUrlContains("inventory")` |
+| `waitUntilUrlIs(url)` | Espera URL exata | `driver.waitUntilUrlIs("https://...")` |
+| `waitUntil(condition)` | Condição customizada | `driver.waitUntil(ExpectedConditions.titleIs("X"))` |
+| `getWrappedDriver()` | Retorna o driver original | `((TakesScreenshot) driver.getWrappedDriver())` |
+
+### Configuração
+
+O `SafeWebDriver` é criado automaticamente pela `BrowserFactory` — não é necessário configurar nada manualmente:
+
+```java
+// BrowserFactory já retorna SafeWebDriver
+SafeWebDriver driver = BrowserFactory.createDriver(Constants.BROWSER);
+
+// Todos os Page Objects recebem SafeWebDriver
+LoginPage loginPage = new LoginPage(driver);
+```
+
+Para timeout personalizado:
+
+```java
+new SafeWebDriver(rawDriver, Duration.ofSeconds(15));
+```
+
+> **Nota:** Os métodos padrão do `WebDriver` (`findElement`, `get`, `quit`, etc.) continuam funcionando normalmente — o `SafeWebDriver` é 100% retrocompatível.
+
+---
+
 ## 📁 Estrutura do Projeto
 
 O projeto segue o padrão **Page Object Model (POM)**, que separa a representação das páginas do site das classes de teste. Cada página web é representada por uma classe Java que encapsula os elementos (locators) e ações (métodos) disponíveis nessa página. As classes de teste utilizam esses objetos de página, sem acessar diretamente os elementos HTML.
@@ -412,13 +488,14 @@ saucedemo-selenium-java-junit-maven/
 │   │           └── utils/
 │   │               ├── BrowserFactory.java
 │   │               ├── BrowserType.java
-│   │               └── Constants.java
+│   │               ├── Constants.java
+│   │               └── SafeWebDriver.java
 │   └── test/
 │       ├── java/
 │       │   └── com/saucedemo/tests/
 │       │       ├── BaseTest.java
-│       │       ├── LoginPageTest.java
-│       │       └── LogoutPageTest.java
+│       │       ├── InventoryPageTest.java
+│       │       └── LoginPageTest.java
 │       └── resources/
 │           ├── allure.properties
 │           └── logging.properties
@@ -430,24 +507,25 @@ saucedemo-selenium-java-junit-maven/
 | Pacote | Caminho | Descrição |
 |--------|---------|-----------|
 | `pages` | `src/main/java/.../pages/` | Page Objects — cada classe representa uma página do site com seus elementos e ações |
-| `utils` | `src/main/java/.../utils/` | Utilitários — constantes, factory de navegador e enum de tipos de browser |
+| `utils` | `src/main/java/.../utils/` | Utilitários — constantes, factory de navegador, enum de tipos de browser e wrapper com auto-wait |
 | `tests` | `src/test/java/.../tests/` | Classes de teste — `BaseTest` com configuração comum e testes herdam dele |
-| `resources` | `src/test/resources/` | Arquivos de configuração — `logging.properties` para suprimir avisos do Selenium |
+| `resources` | `src/test/resources/` | Arquivos de configuração — `logging.properties` para suprimir avisos do Selenium e `allure.properties` |
 
 #### Descrição dos arquivos
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `BaseTest.java` | Classe abstrata que configura e encerra o WebDriver. Todos os testes herdam dela. |
-| `LoginPageTest.java` | Teste de login positivo e negativo no SauceDemo |
-| `LogoutPageTest.java` | Teste de logout no SauceDemo |
-| `LoginPage.java` | Page Object da página de login — localizadores e métodos de interação |
-| `InventoryPage.java` | Page Object da página de inventário — menu lateral e logout |
-| `Constants.java` | Constantes centralizadas (URL, usuário, senha, navegador) |
+| `BaseTest.java` | Classe abstrata que configura e encerra o `SafeWebDriver`. Todos os testes herdam dela. Anotações Allure e screenshot automático no `@AfterEach`. |
+| `LoginPageTest.java` | Teste de login positivo (`BLOCKER`) e negativo (`CRITICAL`) no SauceDemo |
+| `InventoryPageTest.java` | Teste de logout (`BLOCKER`) no SauceDemo — valida retorno à página de login |
+| `LoginPage.java` | Page Object da página de login — localizadores e métodos de interação com auto-wait |
+| `InventoryPage.java` | Page Object da página de inventário — menu lateral e logout com `WebDriverWait` para animações |
+| `Constants.java` | Constantes centralizadas (URL, usuário, senha, navegador) — suporta override via system property |
 | `BrowserType.java` | Enum com os navegadores disponíveis (CHROME, FIREFOX, EDGE, SAFARI e versões headless) |
-| `BrowserFactory.java` | Factory que cria o WebDriver correto baseado no BrowserType selecionado |
+| `BrowserFactory.java` | Factory que cria o `SafeWebDriver` correto baseado no `BrowserType` selecionado |
+| `SafeWebDriver.java` | Wrapper do `WebDriver` com auto-waiting — aguarda elementos visíveis/habilitados/clicáveis antes de ações |
 | `logging.properties` | Configuração de logging para suprimir avisos do CDP do Selenium |
-| `allure.properties` | Configuração do diretório de resultados do Allure |
+| `allure.properties` | Configuração do diretório de resultados do Allure (`target/allure-results`) |
 
 #### Page Object Model vs pom.xml
 
@@ -691,14 +769,14 @@ O Maven irá baixar todas as dependências automaticamente na primeira execuçã
 
 ```bash
 mvn test -Dtest=LoginPageTest
-mvn test -Dtest=LogoutPageTest
+mvn test -Dtest=InventoryPageTest
 ```
 
 ### Executar um método específico
 
 ```bash
 mvn test -Dtest=LoginPageTest#testLoginComUsuarioValido
-mvn test -Dtest=LogoutPageTest#testLogoutComSucesso
+mvn test -Dtest=InventoryPageTest#testLogoutComSucesso
 ```
 
 ### Executar com navegador específico
@@ -803,13 +881,43 @@ jobs:
 
 #### Configuração necessária no GitHub
 
-Para que o deploy funcione, habilite o **GitHub Pages** no repositório:
+O workflow possui dois jobs: **test** (executa os testes) e **deploy** (publica o relatório Allure no GitHub Pages). O job `deploy` usa a action `actions/deploy-pages@v4`, que precisa do GitHub Pages habilitado no repositório — caso contrário, retorna erro **404**.
 
-1. Vá em **Settings** → **Pages**
-2. Em **Source**, selecione **GitHub Actions**
-3. Salve
+> **Por que o GitHub Pages?** O relatório Allure é um site HTML estático. O GitHub Pages hospeda esse site gratuitamente, permitindo que qualquer pessoa acesse o relatório via URL pública, sem precisar baixar nada.
 
-O relatório será acessível em: `https://geovanegustavo.github.io/saucedemo-selenium-java-junit-maven/`
+##### Passo a passo para habilitar
+
+1. Acesse o repositório no GitHub
+2. Vá em **Settings** (aba superior)
+3. No menu lateral, clique em **Pages**
+4. Em **Build and deployment**, em **Source**, selecione **GitHub Actions**
+5. Clique em **Save**
+
+```
+Settings → Pages → Source: GitHub Actions → Save
+```
+
+> **Nota:** Se a opção "GitHub Actions" não aparecer, selecione "Deploy from a branch" → branch `main` → pasta `/ (root)` → Save. Porém, a opção recomendada para este projeto é **GitHub Actions**.
+
+##### O que acontece sem essa configuração
+
+| Job | Sem GitHub Pages habilitado |
+|-----|----------------------------|
+| `test` | Executa normalmente — os testes rodam e geram `target/allure-results/` |
+| `deploy` | **Falha com erro 404** — `Error: Creating Pages deployment failed` |
+
+O job `test` sempre passa (ou falha por causa dos testes, não da configuração). Apenas o `deploy` é afetado.
+
+##### Verificação
+
+Após habilitar, faça um push para o repositório. O workflow irá:
+1. Executar os testes
+2. Gerar o relatório Allure
+3. Publicar no GitHub Pages
+
+O relatório será acessível em: `https://<seu-usuario>.github.io/<nome-do-repo>/`
+
+Exemplo: `https://geovanegustavo.github.io/saucedemo-selenium-java-junit-maven/`
 
 #### Executando os testes localmente com headless
 
@@ -856,6 +964,11 @@ public void testLoginComUsuarioValido() { ... }
 @Story("Login com usuário inválido")
 @Severity(SeverityLevel.CRITICAL)   // validação de regra de negócio
 public void testLoginComUsuarioInvalido() { ... }
+
+@Test
+@Story("Logout com sucesso")
+@Severity(SeverityLevel.BLOCKER)    // fluxo principal do sistema
+public void testLogoutComSucesso() { ... }
 ```
 
 #### Gerar e visualizar o relatório

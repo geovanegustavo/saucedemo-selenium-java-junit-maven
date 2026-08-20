@@ -44,7 +44,8 @@ public class InventoryPage {
     /** Clica no link de logout dentro do menu lateral. */
     public void clickLogout() {
         driver.safeClick(logoutLink);
-        driver.waitUntilUrlContains("saucedemo.com");
+        driver.waitUntil(org.openqa.selenium.support.ui.ExpectedConditions
+                .not(org.openqa.selenium.support.ui.ExpectedConditions.urlContains("inventory")));
     }
 
     /** Realiza o logout completo: abre menu e clica em logout. */
